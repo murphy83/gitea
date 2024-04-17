@@ -44,43 +44,13 @@ RUN chmod 644 /go/src/code.gitea.io/gitea/contrib/autocompletion/bash_autocomple
 FROM docker.io/library/alpine:3.19
 LABEL maintainer="maintainers@gitea.io"
 
-EXPOSE 22 3000
-
-RUN apk --no-cache add \
-    bash \
-    ca-certificates \
-    curl \
-    gettext \
-    git \
-    linux-pam \
-    openssh \
-    s6 \
-    sqlite \
-    su-exec \
-    gnupg \
-    && rm -rf /var/cache/apk/*
-
-RUN addgroup \
-    -S -g 1000 \
-    git && \
-  adduser \
-    -S -H -D \
-    -h /data/git \
-    -s /bin/bash \
-    -u 1000 \
-    -G git \
-    git && \
-  echo "git:*" | chpasswd -e
-
-ENV USER git
 ENV GITEA_CUSTOM /data/gitea
 
 VOLUME ["/data"]
 
 ENTRYPOINT ["/usr/bin/entrypoint"]
-CMD ["/bin/s6-svscan", "/etc/s6"]
 
-COPY --from=build-env /tmp/local /
+COPY --from=build-env /tmp/local/usr/local/bin/gitea /usr/local/bin/gitea
 COPY --from=build-env /go/src/code.gitea.io/gitea/gitea /app/gitea/gitea
 COPY --from=build-env /go/src/code.gitea.io/gitea/environment-to-ini /usr/local/bin/environment-to-ini
 COPY --from=build-env /go/src/code.gitea.io/gitea/contrib/autocompletion/bash_autocomplete /etc/profile.d/gitea_bash_autocomplete.sh
